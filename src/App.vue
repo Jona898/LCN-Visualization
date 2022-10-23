@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import HelloWorld from "./components/HelloWorld.vue";
 import TheWelcome from "./components/TheWelcome.vue";
+import elkjsTest from "./components/graph/elkjsTest.vue";
 </script>
 
 <template>
@@ -10,8 +11,7 @@ import TheWelcome from "./components/TheWelcome.vue";
       class="logo"
       src="./assets/logo.svg"
       width="125"
-      height="125"
-    />
+      height="125" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
@@ -19,6 +19,8 @@ import TheWelcome from "./components/TheWelcome.vue";
   </header>
 
   <main>
+    <elkjsTest></elkjsTest>
+
     <TheWelcome />
   </main>
 </template>
