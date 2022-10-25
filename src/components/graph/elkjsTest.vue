@@ -116,9 +116,7 @@ generateNewLayout();
           {{ opt.name }}: {{ opt.description?.slice(undefined, 80) }}...
         </option>
       </select>
-      <p>
-        {{ selectedAlgorythm }}
-      </p>
+      <p>{{ selectedAlgorythm }}</p>
     </div>
 
     <svg
