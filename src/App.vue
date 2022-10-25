@@ -9,12 +9,18 @@ import { RouterLink, RouterView } from "vue-router";
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/GraphTest">GraphTest</RouterLink>
+        <RouterLink to="/TempTest">TempTest</RouterLink>
       </nav>
     </div>
     <div style="height: 50px" />
   </header>
 
-  <RouterView />
+  <Suspense>
+    <RouterView />
+
+    <!-- loading state via #fallback slot -->
+    <template #fallback> Loading... </template>
+  </Suspense>
 </template>
 
 <style scoped>
@@ -55,7 +61,7 @@ nav a:first-of-type {
 
 @media (min-width: 1024px) {
   header {
-    display: flex;
+    /* display: flex; */
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
   }
