@@ -6,24 +6,14 @@ import ELK, {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type ElkPoint, // Used in template
 } from "elkjs/lib/elk.bundled.js";
-import { reactive, computed, watch, ref, onMounted } from "vue";
+import { reactive, watch, ref } from "vue";
 import ci_router_Router from "./ci_router_Router.json";
 import { useSvgViewBoxZoom } from "@/helper";
 
 const svgRef = ref<SVGElement | null>(null);
-onMounted(() => {
-  console.log(svgRef.value);
-});
-
-const svgWidth = computed<number>(() =>
-  svgRef.value ? svgRef.value.clientWidth : 100
-);
-const svgHeight = computed<number>(() =>
-  svgRef.value ? svgRef.value.clientHeight : 100
-);
 
 const { viewBox_str, wheelEvent, mouseDownEvent, mouseMoveEvent, resetZoom } =
-  useSvgViewBoxZoom(svgWidth, svgHeight);
+  useSvgViewBoxZoom(svgRef);
 
 const elk = new ELK({});
 
@@ -176,7 +166,7 @@ generateNewLayout();
         <!-- Node Id in Box -->
         <text
           opacity="1"
-          stroke="blue"
+          fill="blue"
           :x="node.width! / 2"
           :y="node.height! / 2"
           dominant-baseline="middle"

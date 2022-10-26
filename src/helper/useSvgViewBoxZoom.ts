@@ -1,9 +1,13 @@
-import { computed, reactive, type ComputedRef } from "vue";
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  type Ref,
+} from "vue";
 
-export function useSvgViewBoxZoom(
-  svgWidth: ComputedRef<number>,
-  svgHeight: ComputedRef<number>
-) {
+export function useSvgViewBoxZoom(svgRef: Ref<SVGElement | null>) {
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 12;
   const SCROLL_CHANGE_AMMOUNT = 0.002;
@@ -13,6 +17,28 @@ export function useSvgViewBoxZoom(
     minX: number;
     minY: number;
   }>({ scale: 1, minX: 0, minY: 0 });
+
+  const svgWidth = ref<number>(100);
+  const svgHeight = ref<number>(100);
+
+  onMounted(() => {
+    window.addEventListener("resize", onResizeSvg);
+    if (svgRef.value) {
+      svgWidth.value = svgRef.value.clientWidth;
+      svgHeight.value = svgRef.value.clientHeight;
+    }
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", onResizeSvg);
+  });
+
+  const onResizeSvg = (): void => {
+    if (svgRef.value) {
+      svgWidth.value = svgRef.value.clientWidth;
+      svgHeight.value = svgRef.value.clientHeight;
+    }
+  };
 
   const wheelEvent = (wheelEv: WheelEvent): void => {
     const { offsetX, offsetY, deltaY } = wheelEv;
@@ -46,11 +72,11 @@ export function useSvgViewBoxZoom(
   };
 
   const resetZoom = (
-    width: number | undefined,
-    height: number | undefined
+    graphWidth: number | undefined,
+    graphHeight: number | undefined
   ): void => {
-    const scaleX = width ? width / svgWidth.value : 1;
-    const scaleY = height ? height / svgHeight.value : 1;
+    const scaleX = graphWidth ? graphWidth / svgWidth.value : 1;
+    const scaleY = graphHeight ? graphHeight / svgHeight.value : 1;
 
     viewbox.scale = Math.max(scaleX, scaleY);
     viewbox.minX = 0;

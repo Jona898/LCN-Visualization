@@ -15,12 +15,7 @@ import { RouterLink, RouterView } from "vue-router";
     <div style="height: 50px" />
   </header>
 
-  <Suspense>
-    <RouterView />
-
-    <!-- loading state via #fallback slot -->
-    <template #fallback> Loading... </template>
-  </Suspense>
+  <RouterView />
 </template>
 
 <style scoped>
