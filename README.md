@@ -1,5 +1,10 @@
 # lcn-visualization
 
+## Life-Hosting:
+
+Newest Version is served on github Pages:
+[https://jona898.github.io/lcn-visualization/](https://jona898.github.io/lcn-visualization/)
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup

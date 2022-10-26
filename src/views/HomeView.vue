@@ -1,19 +1,12 @@
-<script setup lang="ts">
-import HelloWorld from "@/components/HelloWorld.vue";
-import TheWelcome from "../components/TheWelcome.vue";
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <main>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125" />
-
-    <HelloWorld msg="You did it!" />
-
-    <TheWelcome />
+    <p>
+      Link To Github Repository:
+      <a href="https://github.com/Jona898/lcn-visualization">
+        Github Repository
+      </a>
+    </p>
   </main>
 </template>
