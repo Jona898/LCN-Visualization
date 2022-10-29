@@ -5,6 +5,7 @@ const props = defineProps<{ edge: ElkExtendedEdge }>();
 
 const generateEdgePath = (line: ElkExtendedEdge): string => {
   if (line.sections == undefined) return "";
+
   return line.sections.reduce<string>(
     (prev, edgeSection) =>
       prev +

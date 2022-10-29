@@ -7,15 +7,15 @@ const firstGraph: ElkNode & {
   children: [
     {
       id: "n1",
-      width: 30,
-      height: 30,
+      width: "30",
+      height: "30",
       ports: [{ id: "n1_p1", layoutOptions: { "elk.port.side": "WEST" } }],
     },
-    { id: "n2", width: 30, height: 30, ports: [{ id: "n2_p1" }] },
-    { id: "n3", width: 30, height: 30, ports: [{ id: "n3_p1" }] },
-    { id: "n4", width: 30, height: 30, ports: [{ id: "n4_p1" }] },
-    { id: "n5", width: 30, height: 30, ports: [{ id: "n5_p1" }] },
-    { id: "n6", width: 30, height: 30, ports: [{ id: "n6_p1" }] },
+    { id: "n2", width: "30", height: "30", ports: [{ id: "n2_p1" }] },
+    { id: "n3", width: "30", height: "30", ports: [{ id: "n3_p1" }] },
+    { id: "n4", width: "30", height: "30", ports: [{ id: "n4_p1" }] },
+    { id: "n5", width: "30", height: "30", ports: [{ id: "n5_p1" }] },
+    { id: "n6", width: "30", height: "30", ports: [{ id: "n6_p1" }] },
   ],
   edges: [
     { id: "e1", sources: ["n1"], targets: ["n2"], path: "" },
