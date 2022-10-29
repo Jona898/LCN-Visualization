@@ -1,25 +1,36 @@
 <script setup lang="ts">
 import ELK, {
   type ElkNode,
-  type ElkExtendedEdge,
   type ElkLayoutAlgorithmDescription,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  type ElkPoint, // Used in template
-} from "elkjs/lib/elk.bundled.js";
-import { reactive, watch, ref } from "vue";
-import ci_router_Router from "./ci_router_Router.json";
-import { useSvgViewBoxZoom } from "@/helper";
+} from "elkjs/lib/elk.bundled";
+import { reactive, watch, ref, provide } from "vue";
+
+import { ci_router_Router, ci_router_Router_hierarchical } from "@/testdata";
+import {
+  useSvgViewBoxZoom,
+  selectedNodeKey,
+  changeSelectedNodeKey,
+} from "@/helper";
+import { NodeGroup, NodeEdge } from "./";
 
 const svgRef = ref<SVGElement | null>(null);
 
 const { viewBox_str, wheelEvent, mouseDownEvent, mouseMoveEvent, resetZoom } =
   useSvgViewBoxZoom(svgRef);
 
+const selectedNode = ref<string>("");
+const changeSelectedNode = (newSelect: string) => {
+  selectedNode.value = newSelect;
+};
+
+provide(selectedNodeKey, selectedNode);
+provide(changeSelectedNodeKey, changeSelectedNode);
+
 const elk = new ELK({});
 
-let graph = reactive<
-  ElkNode & { edges: (ElkExtendedEdge & { path: string })[] }
->(ci_router_Router);
+let graph = reactive<ElkNode>(ci_router_Router_hierarchical);
+// OR ci_router_Router
+//    ci_router_Router_hierarchical
 
 const knownAlgorythms = ref<ElkLayoutAlgorithmDescription[]>([]);
 elk
@@ -29,6 +40,7 @@ elk
 const selectedAlgorythm = ref<string>("layered");
 
 const generateNewLayout = () => {
+  // ToDo: Remoce, if layout isn't changable anymore
   graph.edges?.forEach((edge) => {
     edge.sections?.forEach((section) => {
       section.bendPoints = [];
@@ -38,22 +50,33 @@ const generateNewLayout = () => {
   elk
     .layout(graph, {
       layoutOptions: {
-        "elk.algorithm": selectedAlgorythm.value,
-        // "elk.direction": "DOWN",
-        // "elk.insideSelfLoops.activate": true,
-        // "elk.edge.thickness": 30,
-        // "elk.nodeLabels.placement": "OUTSIDE",
-        // "elk.nodeLabels.padding": "[70,70,70,70]", //"[top=70,left=70,bottom=70,right=70]",
+        "elk.algorithm": "elk.layered",
+        "elk.hierarchyHandling": "SEPARATE_CHILDREN",
+        "elk.portAlignment.default": "DISTRIBUTED",
+        "elk.portConstraints": "FIXED_ORDER",
+
+        "elk.nodeSize.minimum": "(40,40)",
+        "elk.nodeLabels.placement": "[H_CENTER, V_TOP, INSIDE]",
+        "elk.nodeSize.constraints": "[NODE_LABELS, PORTS]",
+        "elk.margins": "[top=20,left=20,bottom=20,right=20]",
+        "elk.padding": "[top=30,left=30,bottom=30,right=30]",
+        "elk.spacing.nodeNode": 20,
+        "elk.layered.spacing.nodeNodeBetweenLayers": 20,
+        "elk.spacing.edgeNode": 20,
+        "elk.layered.spacing.edgeNodeBetweenLayers": 20,
+
+        "elk.edge.thickness": 4,
+
+        "elk.edgeLabels.placement": "CENTER",
+        "elk.edgeLabels.inline": true,
+
+        //   logging: true,
       },
     })
-    .then((val) => {
+    .then(() => {
       resetZoom(graph.width, graph.height);
-      graph.edges = val.edges!.map<ElkExtendedEdge & { path: string }>(
-        (edge) => ({
-          ...edge,
-          path: generateEdgePath(edge),
-        })
-      );
+
+      // console.log(graph);
     })
     .catch((e) => console.warn({ e }));
 };
@@ -66,148 +89,70 @@ watch(
   { immediate: false, deep: true }
 );
 
-const generateEdgePath = (line: ElkExtendedEdge | undefined): string => {
-  if (line?.sections == undefined) return "";
-  return line.sections.reduce<string>(
-    (prev, edgeSection) =>
-      prev +
-      `M${edgeSection.startPoint.x},${edgeSection.startPoint.y}${
-        edgeSection.bendPoints != undefined
-          ? edgeSection.bendPoints?.reduce<string>(
-              (prev, curr) => prev + `L${curr.x},${curr.y}`,
-              ""
-            )
-          : ""
-      }L${edgeSection.endPoint.x},${edgeSection.endPoint.y}`,
-    ""
-  );
-};
-
 generateNewLayout();
 </script>
 
 <template>
-  <div>
-    <div class="tooltip">
-      <span class="tooltiptext">
-        {{
-          knownAlgorythms.find((elem) => elem.id?.includes(selectedAlgorythm))
-            ?.description
-        }}
-      </span>
-      <select
-        name="layoutAlgoryth"
-        id="layoutAlgoryth"
-        v-model.lazy="selectedAlgorythm">
-        <option
-          v-for="opt in knownAlgorythms"
-          :key="opt.id"
-          :value="opt.id?.slice(16)">
-          {{ opt.name }}: {{ opt.description?.slice(undefined, 80) }}...
-        </option>
-      </select>
-      <p>{{ selectedAlgorythm }}</p>
-    </div>
+  <select
+    name="layoutAlgoryth"
+    id="layoutAlgoryth"
+    v-model.lazy="selectedAlgorythm">
+    <option
+      v-for="opt in knownAlgorythms"
+      :key="opt.id"
+      :value="opt.id?.slice(16)">
+      {{ opt.name }}: {{ opt.description?.slice(undefined, 80) }}...
+    </option>
+  </select>
+  <p>{{ selectedAlgorythm }}</p>
 
-    <svg
-      ref="svgRef"
-      xmlns="http://www.w3.org/2000/svg"
-      :viewBox="viewBox_str"
-      style="background-color: green"
-      @wheel.prevent="wheelEvent"
-      @mousedown="mouseDownEvent"
-      @mousemove="mouseMoveEvent">
-      <defs>
-        <!-- Arrow at the end of each Edge -->
-        <marker
-          id="head"
-          orient="auto"
-          markerWidth="2"
-          markerHeight="4"
-          refX="1.55"
-          refY="2">
-          <path d="M0,0 V4 L2,2 Z" fill="black" />
-        </marker>
-      </defs>
+  <svg
+    ref="svgRef"
+    xmlns="http://www.w3.org/2000/svg"
+    :viewBox="viewBox_str"
+    @wheel.prevent="wheelEvent"
+    @mousedown="mouseDownEvent"
+    @mousemove="mouseMoveEvent">
+    <defs>
+      <!-- Arrow at the end of each Edge -->
+      <marker
+        id="markerArrow"
+        orient="auto"
+        markerWidth="2"
+        markerHeight="4"
+        refX="1.55"
+        refY="2">
+        <path class="nodeEdge nodeEdgeMarker" d="M0,0 V4 L2,2 Z" fill="black" />
+      </marker>
+    </defs>
 
-      <!-- Border Graph -->
-      <rect
-        :x="graph.x"
-        :y="graph.y"
-        :width="graph.width"
-        :height="graph.height"
-        fill="none"
-        stroke="#204060"
-        stroke-width="2" />
+    <!-- Border Graph -->
+    <rect
+      :x="graph.x"
+      :y="graph.y"
+      :width="graph.width"
+      :height="graph.height"
+      fill="none"
+      stroke="#204060"
+      stroke-width="2" />
 
-      <!-- Each Node -->
-      <g
-        v-for="node in graph.children"
-        :key="node.id"
-        class="node"
-        :original-title="node.id"
-        :transform="`translate(${node.x != undefined ? node.x : 0},${
+    <!-- Each Node -->
+    <NodeGroup
+      class="nodeGroup"
+      v-for="node in graph.children"
+      :key="node.id"
+      :node="node"
+      :original-title="node.id" />
+    <!-- :transform="`translate(${node.x != undefined ? node.x : 0},${
           node.y != undefined ? node.y : 0
-        })`">
-        <!-- Node Main Box -->
-        <rect :width="node.width" :height="node.height" fill="saddlebrown" />
+  })` -->
 
-        <!-- Node Ports -->
-        <rect
-          v-for="port in node.ports"
-          :key="port.id"
-          :aria-label="port.id"
-          :x="port.x"
-          :y="port.y"
-          :width="port.width"
-          :height="port.height"
-          fill="darkblue" />
-
-        <!-- Node Id in Box -->
-        <text
-          opacity="1"
-          fill="blue"
-          :x="node.width! / 2"
-          :y="node.height! / 2"
-          dominant-baseline="middle"
-          text-anchor="middle">
-          <tspan>
-            {{ node.id }}
-          </tspan>
-        </text>
-
-        <!-- Node Label -->
-        <text
-          v-for="label in node.labels"
-          :key="label.id"
-          :x="label.x"
-          :y="label.y"
-          dominant-baseline="hanging">
-          <!-- text-anchor="middle" -->
-          {{ label.text }}
-        </text>
-      </g>
-
-      <!-- Edges -->
-      <path
-        v-for="edge in graph.edges"
-        :key="edge.sources + '-' + edge.targets"
-        :d="edge.path"
-        stroke-width="3"
-        fill="none"
-        stroke="red"
-        opacity="1"
-        marker-end="url(#head)" />
-
-      <!-- Junction Points -->
-      <circle
-        v-for="joint in graph.edges.reduce<ElkPoint[]>((juncPoints, edge)=>( edge.junctionPoints?juncPoints.concat    (...edge.junctionPoints) :juncPoints ) ,[])"
-        :key="`Joint-${joint.x}-${joint.y}`"
-        :cx="joint.x"
-        :cy="joint.y"
-        r="3" />
-    </svg>
-  </div>
+    <!-- Edges -->
+    <NodeEdge
+      v-for="edge in graph.edges"
+      :key="edge.sources[0] + '-' + edge.targets[0]"
+      :edge="edge" />
+  </svg>
 </template>
 
 <style scoped>
@@ -215,60 +160,17 @@ generateNewLayout();
   color: saddlebrown;
 }
 
-select {
-  max-width: 90vw;
-  overflow-x: hidden;
-}
-
 svg {
   width: 100%;
   height: 80vh;
+  background-color: green;
 }
+</style>
 
-/* Tooltip container */
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  /* width: 120px; */
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
-
-  /* Position the tooltip text */
-  position: absolute;
-  z-index: 1;
-  top: 125%;
-  left: 50%;
-  margin-left: -50%;
-
-  /* Fade in tooltip */
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Tooltip arrow */
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
+// /* Global Style */
+<style>
+svg rect.selected {
+  stroke: red !important;
+  stroke-width: 4 !important;
 }
 </style>
