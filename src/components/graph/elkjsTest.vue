@@ -60,15 +60,15 @@ const generateNewLayout = () => {
         "elk.nodeSize.constraints": "[NODE_LABELS, PORTS]",
         "elk.margins": "[top=20,left=20,bottom=20,right=20]",
         "elk.padding": "[top=30,left=30,bottom=30,right=30]",
-        "elk.spacing.nodeNode": 20,
-        "elk.layered.spacing.nodeNodeBetweenLayers": 20,
-        "elk.spacing.edgeNode": 20,
-        "elk.layered.spacing.edgeNodeBetweenLayers": 20,
+        "elk.spacing.nodeNode": "20",
+        "elk.layered.spacing.nodeNodeBetweenLayers": "20",
+        "elk.spacing.edgeNode": "20",
+        "elk.layered.spacing.edgeNodeBetweenLayers": "20",
 
-        "elk.edge.thickness": 4,
+        "elk.edge.thickness": "4",
 
         "elk.edgeLabels.placement": "CENTER",
-        "elk.edgeLabels.inline": true,
+        "elk.edgeLabels.inline": "true",
 
         //   logging: true,
       },
