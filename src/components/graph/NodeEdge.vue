@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { useGraphStore } from "@/stores";
 import type { ElkExtendedEdge } from "elkjs/lib/elk-api";
 
 const props = defineProps<{ edge: ElkExtendedEdge }>();
+
+const { highlightedItems, changeHighlightedEdge } = useGraphStore();
 
 const generateEdgePath = (line: ElkExtendedEdge): string => {
   if (line.sections == undefined) return "";
@@ -23,7 +26,11 @@ const generateEdgePath = (line: ElkExtendedEdge): string => {
 </script>
 
 <template>
-  <path class="nodeEdge" :d="generateEdgePath(props.edge)" />
+  <path
+    class="nodeEdge"
+    :d="generateEdgePath(props.edge)"
+    @click="changeHighlightedEdge(props.edge)"
+    :class="{ selected: highlightedItems?.has(props.edge.id) }" />
 
   <!-- Junction Points -->
   <circle
@@ -42,6 +49,11 @@ const generateEdgePath = (line: ElkExtendedEdge): string => {
   stroke: gray;
   opacity: 1;
   marker-end: url(#markerArrow);
+}
+
+.nodeEdge.selected {
+  stroke: darkgray;
+  z-index: 2;
 }
 
 .nodeEdgeMarker {

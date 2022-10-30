@@ -1,54 +1,22 @@
 <script setup lang="ts">
-import ELK, {
-  type ElkNode,
-  type ElkLayoutAlgorithmDescription,
-} from "elkjs/lib/elk.bundled";
-import { reactive, watch, ref, provide } from "vue";
-
-import { ci_router_Router, ci_router_Router_hierarchical } from "@/testdata";
-import {
-  useSvgViewBoxZoom,
-  selectedNodeKey,
-  changeSelectedNodeKey,
-} from "@/helper";
+import ELK from "elkjs/lib/elk.bundled";
+import { ref } from "vue";
+import { useSvgViewBoxZoom } from "@/helper";
 import { NodeGroup, NodeEdge } from "./";
+import { storeToRefs, useGraphStore } from "@/stores";
 
 const svgRef = ref<SVGElement | null>(null);
 
 const { viewBox_str, wheelEvent, mouseDownEvent, mouseMoveEvent, resetZoom } =
   useSvgViewBoxZoom(svgRef);
 
-const selectedNode = ref<string>("");
-const changeSelectedNode = (newSelect: string) => {
-  selectedNode.value = newSelect;
-};
-
-provide(selectedNodeKey, selectedNode);
-provide(changeSelectedNodeKey, changeSelectedNode);
+const { showedGraph, highlightOptions } = storeToRefs(useGraphStore());
 
 const elk = new ELK({});
 
-let graph = reactive<ElkNode>(ci_router_Router_hierarchical);
-// OR ci_router_Router
-//    ci_router_Router_hierarchical
-
-const knownAlgorythms = ref<ElkLayoutAlgorithmDescription[]>([]);
-elk
-  .knownLayoutAlgorithms()
-  .then((algorythms) => (knownAlgorythms.value = algorythms));
-
-const selectedAlgorythm = ref<string>("layered");
-
 const generateNewLayout = () => {
-  // ToDo: Remoce, if layout isn't changable anymore
-  graph.edges?.forEach((edge) => {
-    edge.sections?.forEach((section) => {
-      section.bendPoints = [];
-    });
-  });
-
   elk
-    .layout(graph, {
+    .layout(showedGraph.value, {
       layoutOptions: {
         "elk.algorithm": "elk.layered",
         "elk.hierarchyHandling": "SEPARATE_CHILDREN",
@@ -64,6 +32,7 @@ const generateNewLayout = () => {
         "elk.layered.spacing.nodeNodeBetweenLayers": "20",
         "elk.spacing.edgeNode": "20",
         "elk.layered.spacing.edgeNodeBetweenLayers": "20",
+        // "elk.spacing.commentComment": "20",
 
         "elk.edge.thickness": "4",
 
@@ -74,37 +43,48 @@ const generateNewLayout = () => {
       },
     })
     .then(() => {
-      resetZoom(graph.width, graph.height);
+      resetZoom(showedGraph.value.width, showedGraph.value.height);
 
-      // console.log(graph);
+      // console.log(showedGraph);
     })
-    .catch((e) => console.warn({ e }));
+    .catch((e) => console.error({ e }));
 };
-
-watch(
-  selectedAlgorythm,
-  () => {
-    generateNewLayout();
-  },
-  { immediate: false, deep: true }
-);
 
 generateNewLayout();
 </script>
 
 <template>
-  <select
-    name="layoutAlgoryth"
-    id="layoutAlgoryth"
-    v-model.lazy="selectedAlgorythm">
-    <option
-      v-for="opt in knownAlgorythms"
-      :key="opt.id"
-      :value="opt.id?.slice(16)">
-      {{ opt.name }}: {{ opt.description?.slice(undefined, 80) }}...
-    </option>
-  </select>
-  <p>{{ selectedAlgorythm }}</p>
+  <div>
+    <label for="searchDepth_ran">How deep to search to highlight: </label>
+    <input
+      type="range"
+      name="searchDepth_ran"
+      id="searchDepth_ran"
+      min="1"
+      max="10"
+      v-model="highlightOptions.highlightedSearchDepth" />
+    <input
+      type="number"
+      name="searchDepth_num"
+      id="searchDepth_num"
+      min="1"
+      max="10"
+      v-model="highlightOptions.highlightedSearchDepth" />
+  </div>
+  <div>
+    <label for="searchForwards">Search Forwards</label>
+    <input
+      type="checkbox"
+      name="searchForwards"
+      id="searchForwards"
+      v-model="highlightOptions.searchForward" />
+    <label for="searchBackwards">Search Backwards</label>
+    <input
+      type="checkbox"
+      name="searchBackwards"
+      id="searchBackwards"
+      v-model="highlightOptions.searchBackward" />
+  </div>
 
   <svg
     ref="svgRef"
@@ -126,12 +106,12 @@ generateNewLayout();
       </marker>
     </defs>
 
-    <!-- Border Graph -->
+    <!-- Border graph -->
     <rect
-      :x="graph.x"
-      :y="graph.y"
-      :width="graph.width"
-      :height="graph.height"
+      :x="showedGraph.x"
+      :y="showedGraph.y"
+      :width="showedGraph.width"
+      :height="showedGraph.height"
       fill="none"
       stroke="#204060"
       stroke-width="2" />
@@ -139,7 +119,7 @@ generateNewLayout();
     <!-- Each Node -->
     <NodeGroup
       class="nodeGroup"
-      v-for="node in graph.children"
+      v-for="node in showedGraph.children"
       :key="node.id"
       :node="node"
       :original-title="node.id" />
@@ -149,28 +129,16 @@ generateNewLayout();
 
     <!-- Edges -->
     <NodeEdge
-      v-for="edge in graph.edges"
+      v-for="edge in showedGraph.edges"
       :key="edge.sources[0] + '-' + edge.targets[0]"
       :edge="edge" />
   </svg>
 </template>
 
 <style scoped>
-.test {
-  color: saddlebrown;
-}
-
 svg {
   width: 100%;
   height: 80vh;
   background-color: green;
-}
-</style>
-
-// /* Global Style */
-<style>
-svg rect.selected {
-  stroke: red !important;
-  stroke-width: 4 !important;
 }
 </style>

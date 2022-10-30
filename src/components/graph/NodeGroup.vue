@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import type { ElkNode } from "elkjs/lib/elk-api";
-import { inject } from "vue";
 import { NodeGroup as NodeGroupChild, NodeEdge, NodeLabel } from "./";
-import { selectedNodeKey, changeSelectedNodeKey } from "@/helper";
+import { useGraphStore } from "@/stores";
 
 const props = defineProps<{ node: ElkNode }>();
-const selectedNode = inject(selectedNodeKey);
-const changeSelectedNode = inject(changeSelectedNodeKey, (newSelect) => {
-  console.log("ChangeSelectKodeKey Not defined for: ", newSelect);
-});
+
+const { changeHighlightedNode, highlightedItems } = useGraphStore();
 </script>
 
 <template>
@@ -18,13 +15,13 @@ const changeSelectedNode = inject(changeSelectedNodeKey, (newSelect) => {
     :transform="`translate(${props.node.x != undefined ? props.node.x : 0},${
       props.node.y != undefined ? props.node.y : 0
     })`"
-    @click.stop="changeSelectedNode(props.node.id)">
+    @click.stop="changeHighlightedNode(props.node)">
     <!-- Node Main Box -->
     <rect
       class="nodeBackground"
       :width="props.node.width"
       :height="props.node.height"
-      :class="{ selected: selectedNode == props.node.id }" />
+      :class="{ selected: highlightedItems?.has(props.node.id) }" />
 
     <!-- Node Ports -->
     <rect
@@ -73,6 +70,11 @@ const changeSelectedNode = inject(changeSelectedNodeKey, (newSelect) => {
 .nodeBackground {
   fill: saddlebrown;
   stroke: #666;
+}
+
+.nodeBackground.selected {
+  stroke: rgb(15, 89, 173);
+  stroke-width: 4;
 }
 
 .nodePort {
