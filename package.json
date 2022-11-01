@@ -8,7 +8,9 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "check-build": "run-p lint type-check build-only"
+    "check-build": "run-p lint type-check build-only",
+    "serve-dist": "npx live-server dist --port=4000 --no-browser --entry-file=index.html --proxy=/lcn-visualization:http://127.0.0.1:4000",
+    "serve-prod": "run-p check-build serve-dist"
   },
   "type": "module",
   "dependencies": {

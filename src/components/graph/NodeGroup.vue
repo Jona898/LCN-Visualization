@@ -12,10 +12,10 @@ const { changeHighlightedNode, highlightedItems } = useGraphStore();
   <g
     class="nodeGroup"
     :original-title="props.node.id"
-    :transform="`translate(${props.node.x != undefined ? props.node.x : 0},${
-      props.node.y != undefined ? props.node.y : 0
-    })`"
-    @click.stop="changeHighlightedNode(props.node)">
+    @click.stop="changeHighlightedNode(props.node)"
+    :style="{
+      translate: `${props.node.x || 0}px ${props.node.y || 0}px`,
+    }">
     <!-- Node Main Box -->
     <rect
       class="nodeBackground"

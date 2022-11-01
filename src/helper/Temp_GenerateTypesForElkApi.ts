@@ -35,13 +35,13 @@ export class GenerateTypesForApi {
               `/** ${val.name}: \n* ${val.description}\n*/\n"${val.id?.slice(
                 "org.eclipse.".length
               )}"?: ${
-                val.type == "STRING"
+                val.type === "STRING"
                   ? "string"
-                  : val.type == "DOUBLE"
+                  : val.type === "DOUBLE"
                   ? "number"
-                  : val.type == "INT"
+                  : val.type === "INT"
                   ? "number"
-                  : val.type == "BOOLEAN"
+                  : val.type === "BOOLEAN"
                   ? "boolean"
                   : "any"
               }`

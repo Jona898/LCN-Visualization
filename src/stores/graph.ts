@@ -240,9 +240,9 @@ export const useGraphStore = defineStore("graph", () => {
     depth: number
   ) => {
     addTo.add(edge.id);
-    (direction == SearchDirection.FORWARDS
+    (direction === SearchDirection.FORWARDS
       ? edge.targets
-      : direction == SearchDirection.BACKWARDS
+      : direction === SearchDirection.BACKWARDS
       ? edge.sources
       : []
     ).forEach((nodeOrPortId) => {
@@ -288,8 +288,8 @@ export const useGraphStore = defineStore("graph", () => {
   ): ElkNode | undefined => {
     return fromWhere.find(
       (node) =>
-        nodeOrPortId == node.id ||
-        node.ports?.find((port) => port.id == nodeOrPortId)
+        nodeOrPortId === node.id ||
+        node.ports?.find((port) => port.id === nodeOrPortId)
     );
   };
 

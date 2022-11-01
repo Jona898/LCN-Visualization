@@ -7,7 +7,7 @@ const props = defineProps<{ edge: ElkExtendedEdge }>();
 const { highlightedItems, changeHighlightedEdge } = useGraphStore();
 
 const generateEdgePath = (line: ElkExtendedEdge): string => {
-  if (line.sections == undefined) return "";
+  if (!line.sections) return "";
 
   return line.sections.reduce<string>(
     (prev, edgeSection) =>

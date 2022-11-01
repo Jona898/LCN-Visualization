@@ -7,8 +7,15 @@ import { storeToRefs, useGraphStore } from "@/stores";
 
 const svgRef = ref<SVGElement | null>(null);
 
-const { viewBox_str, wheelEvent, mouseDownEvent, mouseMoveEvent, resetZoom } =
-  useSvgViewBoxZoom(svgRef);
+const {
+  viewBox_str,
+  wheelEvent,
+  pointerDownEvent,
+  pointerMoveEvent,
+  pointerUpEvent,
+  pointerCancelEvent,
+  resetZoom,
+} = useSvgViewBoxZoom(svgRef);
 
 const { showedGraph, highlightOptions } = storeToRefs(useGraphStore());
 
@@ -91,8 +98,10 @@ generateNewLayout();
     xmlns="http://www.w3.org/2000/svg"
     :viewBox="viewBox_str"
     @wheel.prevent="wheelEvent"
-    @mousedown="mouseDownEvent"
-    @mousemove="mouseMoveEvent">
+    @pointerdown="pointerDownEvent"
+    @pointermove="pointerMoveEvent"
+    @pointerup="pointerUpEvent"
+    @pointercancel="pointerCancelEvent">
     <defs>
       <!-- Arrow at the end of each Edge -->
       <marker
@@ -140,5 +149,6 @@ svg {
   width: 100%;
   height: 80vh;
   background-color: green;
+  touch-action: none;
 }
 </style>
