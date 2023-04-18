@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
 import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
 import { ci_router_Router_hierarchical } from "@/testdata";
@@ -14,67 +14,32 @@ export const useGraphStore = defineStore("graph", () => {
    * Complete NodeNet
    ********************************************************************/
 
-  // const completeGraph = ref<ElkNode>(ci_router_Router_hierarchical);
+  const completeGraph = ref<ElkNode>(ci_router_Router_hierarchical);
 
-  // const shownIds = ref<Set<string>>(
-  //   new Set([
-  //     "E1",
-  //     "E2",
-  //     "E3",
-  //     "E4",
-  //     "E5",
-  //     "E6",
-  //     "E7",
-  //     "E8",
-  //     "E9",
-  //     "E10",
-  //     "E11",
-  //     "E12",
-  //     "E13",
-  //     "E14",
-  //     "E15",
-  //     "E16",
-  //     "E17",
-  //     "E18",
-  //     "E19",
-  //     "E20",
-  //     "E21",
-  //     "E22",
-  //     "E23",
-  //     "E24",
-  //     "N1",
-  //     "N2",
-  //     "N3",
-  //     "N4",
-  //     "N5",
-  //     "N6",
-  //     "N7",
-  //     "N8",
-  //     "N9",
-  //     "N10",
-  //     "N11",
-  //     "N12",
-  //     "N13",
-  //     "N14",
-  //     "N15",
-  //     "N16",
-  //     "N17",
-  //     "N18",
-  //     "N19",
-  //   ])
-  // );
+  const shownIds = ref<Set<string>>(new Set([]));
+
+  completeGraph.value.children?.forEach((children) => {
+    shownIds.value.add(children.id);
+  });
+
+  const shownedges = computed<ElkExtendedEdge[]>(
+    () =>
+      completeGraph.value.edges?.filter((edge) =>
+        shownIds.value.has(edge.sources[0])
+      ) || []
+  );
 
   /********************************************************************
    * Shown Graph Objects
    ********************************************************************/
 
-  const showedGraph = ref<ElkNode>(ci_router_Router_hierarchical);
-  // ref<ElkNode>({
-  //   ...completeGraph.value,
-  //   children: completeGraph.value.children?.filter((child) =>
-  //     shownIds.value.has(child.id)
-  //   ),
-  // });
+  const showedGraph = // ref<ElkNode>(ci_router_Router_hierarchical);
+    ref<ElkNode>({
+      ...completeGraph.value,
+      children: completeGraph.value.children?.filter((child) =>
+        shownIds.value.has(child.id)
+      ),
+    });
 
   // const addNodeToLayout = (addedNode: ElkNode) => {};
   // const removeNodeToLayout = (removedNode: ElkNode) => {};
@@ -84,22 +49,23 @@ export const useGraphStore = defineStore("graph", () => {
   const allNodesShowedFlat = ref<ElkNode[]>([]);
 
   const updateAllNodesShowedFlat = () => {
-    const flatNodes = showedGraph.value.children?.reduce<ElkNode[]>(
-      (prev, curr) =>
-        curr.children
-          ? prev.concat(
-              curr,
-              ...curr.children.reduce<ElkNode[]>(
-                (prev, curr) =>
-                  curr.children
-                    ? prev.concat(curr, ...curr.children)
-                    : prev.concat(curr),
-                []
+    const flatNodes: ElkNode[] =
+      showedGraph.value.children?.reduce<ElkNode[]>(
+        (prev, curr) =>
+          curr.children
+            ? prev.concat(
+                curr,
+                ...curr.children.reduce<ElkNode[]>(
+                  (prev, curr) =>
+                    curr.children
+                      ? prev.concat(curr, ...curr.children)
+                      : prev.concat(curr),
+                  []
+                )
               )
-            )
-          : prev.concat(curr),
-      []
-    );
+            : prev.concat(curr),
+        []
+      ) || [];
     allNodesShowedFlat.value = flatNodes
       ? flatNodes.concat(showedGraph.value)
       : [showedGraph.value];
@@ -116,7 +82,7 @@ export const useGraphStore = defineStore("graph", () => {
   };
 
   watch(
-    updateShownNodes,
+    shownIds,
     () => {
       updateAllNodesShowedFlat();
       updateAllEdgesShownFlat();
@@ -138,12 +104,12 @@ export const useGraphStore = defineStore("graph", () => {
     searchBackward: true,
   });
 
-  const highlightedItem = ref<string>("");
+  const highlightedNode = ref<string>("");
 
   const highlightedItems = ref<Set<string>>(new Set());
 
   const changeHighlightedNode = (newSelect: ElkNode) => {
-    highlightedItem.value = newSelect.id;
+    highlightedNode.value = newSelect.id;
 
     highlightedItems.value.clear();
 
@@ -179,7 +145,7 @@ export const useGraphStore = defineStore("graph", () => {
   };
 
   const changeHighlightedEdge = (newSelect: ElkExtendedEdge) => {
-    highlightedItem.value = newSelect.id;
+    highlightedNode.value = newSelect.id;
 
     highlightedItems.value.clear();
 
@@ -295,11 +261,22 @@ export const useGraphStore = defineStore("graph", () => {
 
   return {
     showedGraph,
-    highlightedNode: highlightedItem,
+    highlightedNode,
     changeHighlightedNode,
     changeHighlightedEdge,
     highlightedItems,
     updateShownNodes,
     highlightOptions,
+
+    // completeGraph,
+    // shownIds,
+    // allNodesShowedFlat,
+    // updateAllNodesShowedFlat,
+    // allEdgesShownFlat,
+    // updateAllEdgesShownFlat,
+    // addItemsForNode,
+    // addItemsForEdge,
+    // FindEdgesForId,
+    // getNodeForNodeOrPortId,
   };
 });

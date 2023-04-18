@@ -5,6 +5,10 @@ import { useGraphStore } from "@/stores";
 
 const props = defineProps<{ node: ElkNode }>();
 
+const emits = defineEmits<{
+  (event: "openContextMenu", ev: MouseEvent, node: ElkNode): void;
+}>();
+
 const { changeHighlightedNode, highlightedItems } = useGraphStore();
 </script>
 
@@ -21,7 +25,8 @@ const { changeHighlightedNode, highlightedItems } = useGraphStore();
       class="nodeBackground"
       :width="props.node.width"
       :height="props.node.height"
-      :class="{ selected: highlightedItems?.has(props.node.id) }" />
+      :class="{ selected: highlightedItems?.has(props.node.id) }"
+      @contextmenu.prevent="(e:MouseEvent) => emits('openContextMenu', e, node)" />
 
     <!-- Node Ports -->
     <rect
@@ -50,7 +55,8 @@ const { changeHighlightedNode, highlightedItems } = useGraphStore();
     <NodeGroupChild
       v-for="child in props.node.children"
       :key="child.id"
-      :node="child" />
+      :node="child"
+      @open-context-menu="(e, node) => emits('openContextMenu', e, node)" />
 
     <!-- Edges -->
     <NodeEdge

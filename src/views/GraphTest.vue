@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useGraphStore } from "@/stores";
 import elkjsTest from "../components/graph/elkjsTest.vue";
+
+useGraphStore();
 </script>
 
 <template>

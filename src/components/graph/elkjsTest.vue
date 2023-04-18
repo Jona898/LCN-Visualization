@@ -4,6 +4,7 @@ import { ref } from "vue";
 import { useSvgViewBoxZoom } from "@/helper";
 import { NodeGroup, NodeEdge } from "./";
 import { storeToRefs, useGraphStore } from "@/stores";
+import ContextMenu_Nodes from "../ContextMenu/ContextMenu_Nodes.vue";
 
 const svgRef = ref<SVGElement | null>(null);
 
@@ -56,6 +57,8 @@ const generateNewLayout = () => {
     })
     .catch((e) => console.error({ e }));
 };
+
+const contextMenu_node = ref<typeof ContextMenu_Nodes | null>(null);
 
 generateNewLayout();
 </script>
@@ -131,7 +134,8 @@ generateNewLayout();
       v-for="node in showedGraph.children"
       :key="node.id"
       :node="node"
-      :original-title="node.id" />
+      :original-title="node.id"
+      @open-context-menu="(e, node) => contextMenu_node?.open(e, node)" />
     <!-- :transform="`translate(${node.x != undefined ? node.x : 0},${
           node.y != undefined ? node.y : 0
   })` -->
@@ -142,6 +146,8 @@ generateNewLayout();
       :key="edge.sources[0] + '-' + edge.targets[0]"
       :edge="edge" />
   </svg>
+
+  <ContextMenu_Nodes ref="contextMenu_node"> </ContextMenu_Nodes>
 </template>
 
 <style scoped>
