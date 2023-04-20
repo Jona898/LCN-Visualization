@@ -44,13 +44,13 @@ const open = (e: MouseEvent) => {
   // updates position of context menu
   left.value = e.pageX || e.clientX;
   top.value = e.pageY || e.clientY;
-  // make element focused
 
+  // make element focused
   nextTick(() => context.value?.focus());
   show.value = true;
 };
 
-defineExpose({ open, top, left });
+defineExpose({ open });
 </script>
 
 <style scoped>

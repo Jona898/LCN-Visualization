@@ -58,7 +58,9 @@ const generateNewLayout = () => {
     .catch((e) => console.error({ e }));
 };
 
-const contextMenu_node = ref<typeof ContextMenu_Nodes | null>(null);
+const contextMenu_node = ref<InstanceType<typeof ContextMenu_Nodes> | null>(
+  null
+);
 
 generateNewLayout();
 </script>
@@ -136,9 +138,7 @@ generateNewLayout();
       :node="node"
       :original-title="node.id"
       @open-context-menu="(e, node) => contextMenu_node?.open(e, node)" />
-    <!-- :transform="`translate(${node.x != undefined ? node.x : 0},${
-          node.y != undefined ? node.y : 0
-  })` -->
+    <!-- :transform="`translate(${node.x || 0},${node.y || 0})`" -->
 
     <!-- Edges -->
     <NodeEdge

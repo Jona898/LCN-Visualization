@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import ContextMenue from "@/components/ContextMenu/ContextMenu.vue.js";
+import ContextMenue from "@/components/ContextMenu/ContextMenu.vue";
 import { onMounted, ref } from "vue";
 
 const showContextMenue = ref(true);
-const context_menu = ref<typeof ContextMenue | null>(null);
+const context_menu = ref<InstanceType<typeof ContextMenue> | null>(null);
 
 let error = "";
 
 onMounted(() => {
   if (context_menu.value) {
-    // contextMenue.value.open();
-    context_menu.value.top = 200;
-    context_menu.value.left = 500;
+    const event: Pick<MouseEvent, "pageX" | "pageY" | "clientX" | "clientY"> = {
+      clientX: 500,
+      pageX: 500,
+      clientY: 200,
+      pageY: 200,
+    };
+    context_menu.value.open(<MouseEvent>event);
   } else {
     error = "Contextmenu.value not set";
   }
@@ -26,7 +30,6 @@ const rightClick = (e: MouseEvent) => {
 
 <template>
   <div @contextmenu="(e) => rightClick(e)">
-    <!-- @click.right.prevent="(e) => context_menu?.open(e)" -->
     <div>Testseite für temporäre Tests</div>
     {{ error }}
     {{ context_menu }}

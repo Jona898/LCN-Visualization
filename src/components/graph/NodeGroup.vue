@@ -26,7 +26,7 @@ const { changeHighlightedNode, highlightedItems } = useGraphStore();
       :width="props.node.width"
       :height="props.node.height"
       :class="{ selected: highlightedItems?.has(props.node.id) }"
-      @contextmenu.prevent="(e:MouseEvent) => emits('openContextMenu', e, node)" />
+      @contextmenu.prevent="(e) => emits('openContextMenu', e, node)" />
 
     <!-- Node Ports -->
     <rect
